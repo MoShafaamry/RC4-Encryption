@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RC4 Encrypt & Decrypt</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #333;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        #key {
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            border-radius: 10px;
+        }
+        label {
+            padding: 5px;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>RC4 Encrypt & Decrypt</h1>
+    <label for="inputText">Input Text:</label>
+    <textarea id="inputText"></textarea>
+
+    <label for="key">Key:</label>
+    <input type="text" id="key" placeholder="Enter key" style="width: 100%; margin-bottom: 10px;">
+
+    <button onclick="encryptText()">Encrypt</button>
+    <button onclick="decryptText()">Decrypt</button>
+
+    <div class="output">
+        <strong>Output:</strong>
+        <pre id="outputText"></pre>
+    </div>
+
+    <script>
+        function rc4(key, str) {
+            let s = [], j = 0, x, res = '';
+            for (let i = 0; i < 256; i++) {
+                s[i] = i;
+            }
+            for (let i = 0; i < 256; i++) {
+                j = (j + s[i] + key.charCodeAt(i % key.length)) % 256;
+                [s[i], s[j]] = [s[j], s[i]];
+            }
+            i = j = 0;
+            for (let y = 0; y < str.length; y++) {
+                i = (i + 1) % 256;
+                j = (j + s[i]) % 256;
+                [s[i], s[j]] = [s[j], s[i]];
+                res += String.fromCharCode(str.charCodeAt(y) ^ s[(s[i] + s[j]) % 256]);
+            }
+            return res;
+        }
+
+        function encryptText() {
+            const text = document.getElementById('inputText').value;
+            const key = document.getElementById('key').value;
+            const encrypted = btoa(rc4(key, text));
+            document.getElementById('outputText').innerText = encrypted;
+        }
+
+        function decryptText() {
+            const text = document.getElementById('inputText').value;
+            const key = document.getElementById('key').value;
+            const decrypted = rc4(key, atob(text));
+            document.getElementById('outputText').innerText = decrypted;
+        }
+    </script>
+</body>
+</html>
