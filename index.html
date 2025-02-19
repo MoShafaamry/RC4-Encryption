@@ -72,38 +72,52 @@
     </div>
 
     <script>
-        function rc4(key, str) {
-            let s = [], j = 0, x, res = '';
-            for (let i = 0; i < 256; i++) {
-                s[i] = i;
-            }
-            for (let i = 0; i < 256; i++) {
-                j = (j + s[i] + key.charCodeAt(i % key.length)) % 256;
-                [s[i], s[j]] = [s[j], s[i]];
-            }
-            i = j = 0;
-            for (let y = 0; y < str.length; y++) {
-                i = (i + 1) % 256;
-                j = (j + s[i]) % 256;
-                [s[i], s[j]] = [s[j], s[i]];
-                res += String.fromCharCode(str.charCodeAt(y) ^ s[(s[i] + s[j]) % 256]);
-            }
-            return res;
-        }
 
-        function encryptText() {
-            const text = document.getElementById('inputText').value;
-            const key = document.getElementById('key').value;
-            const encrypted = btoa(rc4(key, text));
-            document.getElementById('outputText').innerText = encrypted;
-        }
+        
+        // RC4 encryption/decryption function
+function rc4(key, str) {
+    let s = [], j = 0, x, res = '';
 
-        function decryptText() {
-            const text = document.getElementById('inputText').value;
-            const key = document.getElementById('key').value;
-            const decrypted = rc4(key, atob(text));
-            document.getElementById('outputText').innerText = decrypted;
-        }
+    // Step 1: Initialize the S-box (array of 256 values)
+    for (let i = 0; i < 256; i++) {
+        s[i] = i;
+    }
+
+    // Step 2: Key Scheduling Algorithm (KSA) - Mixing the key into the S-box
+    for (let i = 0; i < 256; i++) {
+        j = (j + s[i] + key.charCodeAt(i % key.length)) % 256;
+        [s[i], s[j]] = [s[j], s[i]]; // Swap values in the S-box
+    }
+
+    i = j = 0;
+
+    // Step 3: Pseudo-Random Generation Algorithm (PRGA) - Encrypt/Decrypt process
+    for (let y = 0; y < str.length; y++) {
+        i = (i + 1) % 256;
+        j = (j + s[i]) % 256;
+        [s[i], s[j]] = [s[j], s[i]]; // Swap values again in the S-box
+        res += String.fromCharCode(str.charCodeAt(y) ^ s[(s[i] + s[j]) % 256]); // XOR operation for encryption/decryption
+    }
+
+    return res; // Return the encrypted/decrypted text
+}
+
+// Function to encrypt user input text
+function encryptText() {
+    const text = document.getElementById('inputText').value; // Get text input from user
+    const key = document.getElementById('key').value; // Get encryption key from user
+    const encrypted = btoa(rc4(key, text)); // Encrypt the text using RC4 and encode it in Base64
+    document.getElementById('outputText').innerText = encrypted; // Display the encrypted text
+}
+
+// Function to decrypt user input text
+function decryptText() {
+    const text = document.getElementById('inputText').value; // Get encrypted text input from user
+    const key = document.getElementById('key').value; // Get decryption key from user
+    const decrypted = rc4(key, atob(text)); // Decode Base64 text and decrypt it using RC4
+    document.getElementById('outputText').innerText = decrypted; // Display the decrypted text
+}
+
     </script>
 </body>
 </html>
